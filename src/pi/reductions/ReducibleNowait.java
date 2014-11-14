@@ -15,9 +15,11 @@ public class ReducibleNowait<E> {
 			this.next = null;
 			this.threadID = Thread.currentThread().getId();
 		}	
+		
+		long getThreadID() {
+			return this.threadID;
+		}
 	}
-	
-	private HashMap<Integer,E> threadValues = new HashMap<Integer,E>();
 	
 	private int expectSize = 0;
 	private AtomicInteger actualSize = new AtomicInteger(0);
@@ -121,6 +123,7 @@ public class ReducibleNowait<E> {
 				myFirstValue = reduction.reduce(myFirstValue, mySecondValue);
 				if (this.actualSize.get() == this.numOfReductionOperated.incrementAndGet() - 1) {
 					this.reducedValue = myFirstValue;
+					this.alreadyReduced = true;
 					return this.reducedValue;
 				}
 			}
@@ -131,6 +134,6 @@ public class ReducibleNowait<E> {
 				continue;
 			}
 		}
-		return null;
+		return this.reducedValue;
 	}
 }

@@ -18,7 +18,7 @@ public class TestThread extends Thread{
 			reducible.put(i);
 		}
 		System.out.println("reduction .....");
-		reducible.reduce(new SimReduction());
+//		reducible.reduce(new SimReduction());
 		System.out.println("reduction done...");
 	}
 }

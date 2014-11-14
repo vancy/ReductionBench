@@ -26,16 +26,20 @@ public class Runner {
 	}
 	
 	private static void singleTest() {
-		System.out.println("Starting single test");
 		
-		ReducibleNowait<Integer> reducible = new ReducibleNowait<Integer>(0,10);
+		long startTime = 0;
+		long endTime = 0;
+		
+		ReducibleNowait<Integer> reducible = new ReducibleNowait<Integer>(0,100);
 		
 		TestThread th = new TestThread(reducible, 10);
 		th.start();
-		System.out.println("thread started");
-		while (!reducible.reduceFinished()); 
 		
-		System.out.println("reduction finished");
+		startTime = System.nanoTime();
+		reducible.reduce(new SimReduction());
+		endTime = System.nanoTime();
+		
+		System.out.println("ori reduction finished(Execution Time:"+ (endTime-startTime) +")");
 		System.out.println("Result:"+reducible.reduce(new SimReduction()));
 		
 	}

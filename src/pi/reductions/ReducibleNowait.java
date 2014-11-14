@@ -135,9 +135,8 @@ public class ReducibleNowait<E> {
 			}
 			while ((mySecondValue = this.deq()) != null) {
 				myFirstValue = reduction.reduce(myFirstValue, mySecondValue);
-				
+				System.out.println("reduce conducted by thread"+Thread.currentThread().getId());
 				if (this.actualSize.get()-1 == this.numOfReductionOperated.incrementAndGet()) {
-					//System.out.println("|reduction times:"+this.numOfReductionOperated.get()+" | actual size:"+this.actualSize.get());
 					this.reducedValue = myFirstValue;
 					this.alreadyReduced = true;
 					return this.reducedValue;

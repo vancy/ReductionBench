@@ -6,10 +6,15 @@ import pi.reductions.ReducibleNowait;
 public class Runner {
 	
 	public static void main(String []s) {
-		singleTest();
+		//singleTest();
+		groupTest();
 	}
 	
-	private static void groupTest() {
+	private static void groupTest()  {
+		
+		long startTime = 0;
+		long endTime = 0;
+		
 		ReducibleNowait<Integer> reducible = new ReducibleNowait<Integer>(0,100);
 		
 		TestThread[] thGroup = new TestThread[10];
@@ -22,8 +27,19 @@ public class Runner {
 			thGroup[i].start();
 		}
 		
-		while (!reducible.reduceFinished()); 
-		System.out.println("Result:"+reducible.reduce(new SimReduction()));
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		startTime = System.nanoTime();
+		int result = reducible.reduce(new SimReduction());
+		endTime = System.nanoTime();
+		
+		System.out.println("new version reduction finished(Execution Time:"+ (endTime-startTime) +")");
+		System.out.println("Result:"+result);
 	}
 	
 	private static void singleTest() {
@@ -37,11 +53,11 @@ public class Runner {
 		th.start();
 		
 		startTime = System.nanoTime();
-		reducible.reduce(new SimReduction());
+		int result = reducible.reduce(new SimReduction());
 		endTime = System.nanoTime();
 		
-		System.out.println("ori reduction finished(Execution Time:"+ (endTime-startTime) +")");
-		System.out.println("Result:"+reducible.reduce(new SimReduction()));
+		System.out.println("new version reduction finished(Execution Time:"+ (endTime-startTime) +")");
+		System.out.println("Result:"+result);
 		
 	}
 

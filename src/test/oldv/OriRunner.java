@@ -35,11 +35,11 @@ public class OriRunner {
 			e.printStackTrace();
 		}
 		startTime = System.nanoTime();
-		reducible.reduce(new SimReduction());
+		int result = reducible.reduce(new SimReduction());
 		endTime = System.nanoTime();
 		
 		System.out.println("ori reduction finished(Execution Time:"+ (endTime-startTime) +")");
-		System.out.println("Result:"+reducible.reduce(new SimReduction()));
+		System.out.println("Result:"+result);
 		
 	}
 

@@ -1,5 +1,6 @@
 package test.newv;
 
+import test.SimReduction;
 import pi.reductions.ReducibleNowait;
 
 public class TestThread extends Thread{
@@ -15,10 +16,12 @@ public class TestThread extends Thread{
 	public void run() {
 		
 		for(int i=0; i<id; i++) {
-			reducible.put(i);
+			reducible.put(1);
 		}
-		System.out.println("reduction .....");
-//		reducible.reduce(new SimReduction());
-		System.out.println("reduction done...");
+		//if (id < 5) {
+			reducible.reduce(new SimReduction());
+		//}
+
+
 	}
 }

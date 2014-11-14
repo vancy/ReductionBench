@@ -10,7 +10,7 @@ public class SimReduction implements Reduction<Integer>{
 	@Override
 	public Integer reduce(Integer first, Integer second) {
 		Integer result = first+second;
-		simTimeElaspe();
+		//simTimeElaspe();
 		return result;
 	}
 	

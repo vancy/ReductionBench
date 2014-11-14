@@ -1,5 +1,5 @@
 package pi.reductions;
-import java.util.HashMap;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -8,11 +8,11 @@ public class ReducibleNowait<E> {
 	
 	private class Node {
 		private E value;
-		private AtomicReference<Node> next;
+		private AtomicReference<Node> next = new AtomicReference<Node>();
 		private long threadID;
 		Node(E ref) {
 			this.value = ref;
-			this.next = null;
+			this.next.set(null);
 			this.threadID = Thread.currentThread().getId();
 		}	
 		
@@ -25,8 +25,8 @@ public class ReducibleNowait<E> {
 	private AtomicInteger actualSize = new AtomicInteger(0);
 	private AtomicInteger numOfReductionOperated = new AtomicInteger(0);
 	
-	private AtomicReference<Node> head;
-	private AtomicReference<Node> tail;
+	private AtomicReference<Node> head = new AtomicReference<Node>();
+	private AtomicReference<Node> tail = new AtomicReference<Node>();
 	
 	private volatile boolean alreadyReduced = false;
 	private volatile boolean elementPuttingFinished = false;
@@ -36,11 +36,18 @@ public class ReducibleNowait<E> {
 	
 	public ReducibleNowait(E initialValue) {
 		this.initialValue = initialValue;
+		
+		this.head.set(new Node(null));
+		this.tail.set(this.head.get());
 	}
 	
 	public ReducibleNowait(E initialValue, int elementSize) {
 		this.initialValue = initialValue;
 		this.expectSize = elementSize;
+		
+		this.head.set(new Node(null));
+		this.tail.set(this.head.get());
+		
 	}
 	
 	
@@ -54,6 +61,12 @@ public class ReducibleNowait<E> {
 			throw new RuntimeException("Cannot put value " + value + " to Reducible container, because container stops accepting element");
 		}
 		
+		enq(value);
+		//increase actualSize
+		this.actualSize.incrementAndGet();
+	}
+	
+	private boolean enq(E value) {
 		Node node = new Node(value);
 		while (true) {
 			Node last = this.tail.get();
@@ -62,9 +75,7 @@ public class ReducibleNowait<E> {
 				if (next == null) {
 					if (last.next.compareAndSet(next, node)) {
 						this.tail.compareAndSet(last, node);
-						//increase actualSize
-						this.actualSize.incrementAndGet();
-						return;
+						return false;
 					}
 				}
 			}
@@ -74,7 +85,7 @@ public class ReducibleNowait<E> {
 		}
 	}
 	
-	public E deq() throws EmptyQueueException {
+	private E deq() throws EmptyQueueException {
 		while(true) {
 			Node first = head.get();
 			Node last = tail.get();
@@ -86,12 +97,12 @@ public class ReducibleNowait<E> {
 						return null;
 					}
 					tail.compareAndSet(last, next);
+				}
+				else {
+					E value = next.value;
+					if (head.compareAndSet(first, next)) {
+						return value;
 					}
-			}
-			else {
-				E value = next.value;
-				if (head.compareAndSet(first, next)) {
-					return value;
 				}
 			}
 		}
@@ -99,6 +110,10 @@ public class ReducibleNowait<E> {
 	
 	public void finishPuttingElement() {
 		this.elementPuttingFinished = true;
+	}
+	
+	public boolean reduceFinished() {
+		return this.alreadyReduced;
 	}
 	
 	public E reduce(Reduction<E> reduction) {
@@ -110,7 +125,7 @@ public class ReducibleNowait<E> {
 		
 		E myFirstValue = null;
 		E mySecondValue = null;
-		
+
 		//Else, get my first value
 		while (this.alreadyReduced == false) {
 			myFirstValue = this.deq();
@@ -118,10 +133,11 @@ public class ReducibleNowait<E> {
 				//if I cannot get my firstValue, restart the while loop
 				continue;
 			}
-			
 			while ((mySecondValue = this.deq()) != null) {
 				myFirstValue = reduction.reduce(myFirstValue, mySecondValue);
-				if (this.actualSize.get() == this.numOfReductionOperated.incrementAndGet() - 1) {
+				
+				if (this.actualSize.get()-1 == this.numOfReductionOperated.incrementAndGet()) {
+					//System.out.println("|reduction times:"+this.numOfReductionOperated.get()+" | actual size:"+this.actualSize.get());
 					this.reducedValue = myFirstValue;
 					this.alreadyReduced = true;
 					return this.reducedValue;
@@ -129,7 +145,7 @@ public class ReducibleNowait<E> {
 			}
 			if (mySecondValue == null) {
 				//If I cannot get my secondValue, put back my first value to the queue;
-				this.put(myFirstValue);
+				this.enq(myFirstValue);
 				//restart the while loop again
 				continue;
 			}

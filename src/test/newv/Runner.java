@@ -1,5 +1,6 @@
-package test;
+package test.newv;
 
+import test.SimReduction;
 import pi.reductions.ReducibleNowait;
 
 public class Runner {

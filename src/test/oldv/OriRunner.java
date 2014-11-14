@@ -1,4 +1,4 @@
-package testori;
+package test.oldv;
 
 import pi.reductions.Reducible;
 import pi.reductions.ReducibleNowait;

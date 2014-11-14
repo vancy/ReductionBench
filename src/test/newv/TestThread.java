@@ -1,4 +1,4 @@
-package test;
+package test.newv;
 
 import pi.reductions.ReducibleNowait;
 
